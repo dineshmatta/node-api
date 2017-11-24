@@ -19,8 +19,8 @@ module.exports = function(app, db) {
 	const reservation = {
 		name: req.body.name, 
 		hotelName: req.body.hotelName, 
-		arrivalDate: req.body.arrivalDate, 
-		departureDate: req.body.departureDate 
+		arrivalDate: new Date(req.body.arrivalDate), 
+		departureDate: new Date(req.body.departureDate) 
 	};
     db.collection('reservations').insert(reservation, (err, result) => {
       if (err) { 
@@ -32,10 +32,14 @@ module.exports = function(app, db) {
   });
 
   app.get('/reservations', (req, res) => {
-	// Get the documents collection
+  	if(req.query.hasOwnProperty('arrivalDate')) {
+  		req.query.arrivalDate = new Date(req.query.arrivalDate);
+  	}
+  	if (req.query.hasOwnProperty('departureDate')) {
+  		req.query.departureDate = new Date(req.query.departureDate);
+  	}
 	const collection = db.collection('reservations');
-		// Find some documents
-	collection.find({}).toArray(function(err, items) {
+	collection.find(req.query).toArray(function(err, items) {
 		if (err) {
 	        res.send({'error':'An error has occurred'});
 	    } else {
